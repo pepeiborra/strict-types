@@ -8,7 +8,6 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | Type constraints and patterns for strict types.
---   A type T is strict if @forall x :: T . rnf x = \bot <=> rwhnf x = \bot
 module Type.Strict
   ( Strict
   , pattern IsStrict
@@ -17,6 +16,19 @@ module Type.Strict
 import GHC.Exts
 import GHC.Generics
 import GHC.TypeLits
+
+import Data.Array.Storable as St
+import Data.Array.Unboxed as U
+import Data.ByteString
+import Data.Map.Strict
+import Data.HashMap.Strict
+import Data.HashSet
+import Data.Set
+import qualified Data.Text
+import Data.Vector.Primitive as P
+import Data.Vector.Storable as St
+import Data.Vector.Unboxed as U
+import qualified Foundation as F
 
 type family StrictRep (d :: *) (a :: * -> *) :: Constraint where
   StrictRep d (M1 c (MetaData _ _ _ isNewtype) f) = StrictType isNewtype d f
@@ -32,12 +44,12 @@ type family StrictCons (isNewtype :: Bool) (typ :: *) (cons :: Symbol) (a :: * -
   StrictCons isNewtype d cons (M1 c meta f) = (StrictSel d cons meta, StrictField d f)
   StrictCons isNewtype d cons field = StrictField d field
 
-type family StrictField  (d :: *) (a :: * -> *) :: Constraint where
-  StrictField d V1 = ()
-  StrictField d U1 = ()
-  StrictField d (K1 i d) = ()
-  StrictField d (K1 i c) = Strict c
-  StrictField d (URec a) = Strict a
+type family StrictField  (rec :: *) (a :: * -> *) :: Constraint where
+  StrictField rec V1 = ()
+  StrictField rec U1 = ()
+  StrictField rec (K1 i rec) = ()
+  StrictField rec (K1 i c) = Strict c
+  StrictField rec (URec a) = Strict a
 
 type family StrictSel (typ :: *) (cons :: Symbol) (m :: Meta) :: Constraint where
   StrictSel d cons (MetaSel mn su ss ds) = IsDecidedStrict d cons mn ds
@@ -50,12 +62,40 @@ instance TypeError (ShowType t :<>: Text " has an unnamed lazy field in construc
 instance TypeError (ShowType t :<>: Text " has a lazy field " :<>: Text f :<>: Text " in constructor " :<>: Text c) =>
          IsDecidedStrict t c (Just f) DecidedLazy
 
--- | A closed constraint that uses GHC Generics to decide if a type is strict.
+-- | A closed predicate that is satisfied only by strict types.
+-- 
+--   A type T is strict if
+--
+--   > ∀x :: T . rnf x = ⊥ <=> rwhnf x = ⊥
+--
 --   Requires undecidable instances. Mutually recursive groups of types not yet supported.
 type family Strict (d :: *) :: Constraint where
-  Strict Int = ()
+  -- Primitives
+  Strict Char = ()
   Strict Double = ()
+  Strict Int = ()
+  Strict Integer = ()
+  Strict Word = ()
+  -- Strict Data
+  Strict ByteString = ()
+  Strict Data.Text.Text = ()
+  Strict F.String = ()
+  -- Strict Containers
+  Strict (UArray ix v) = ()
+  Strict (StorableArray ix v) = ()
+  Strict (Map k v) = (Strict k, Strict v)
+  Strict (HashMap k v) = (Strict k, Strict v)
+  Strict (Set k) = Strict k
+  Strict (HashSet k) = Strict k
+  Strict (U.Vector a) = ()
+  Strict (U.MVector s a) = ()
+  Strict (St.Vector a) = ()
+  Strict (St.MVector s a) = ()
+  Strict (P.Vector a) = ()
+  Strict (P.MVector s a) = ()
+  -- Generics
   Strict d = StrictRep d (Rep d)
 
+-- | A pattern that matches strict types
 pattern IsStrict :: Strict a => a -> a
 pattern IsStrict a = a
