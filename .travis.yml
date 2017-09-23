@@ -39,8 +39,8 @@ before_install:
 
 install:
 # Build dependencies
-- stack --resolver %RESOLVER% --no-system-ghc --install-ghc build --only-dependencies
+- stack --resolver $RESOLVER --no-system-ghc --install-ghc build --only-dependencies
 
 script:
 # Build the package, its tests, and its docs and run the tests
-- stack --resolver %RESOLVER% --no-system-ghc --jobs 1 --no-terminal test --haddock --no-haddock-deps
+- stack --resolver $RESOLVER --no-system-ghc --jobs 1 --no-terminal test --haddock --no-haddock-deps
