@@ -27,8 +27,8 @@ addons:
       - libgmp-dev
 
 env:
-  -STACK_YAML=stack.yaml
-  -STACK_YAML=stack-lts9.yaml
+    - RESOLVER: lts-9.4
+    - RESOLVER: nightly-2017-09-10
 
   
 before_install:
@@ -39,8 +39,8 @@ before_install:
 
 install:
 # Build dependencies
-- stack --no-terminal --install-ghc test --only-dependencies
+- stack --resolver %RESOLVER% --no-system-ghc --install-ghc build --only-dependencies
 
 script:
 # Build the package, its tests, and its docs and run the tests
-- stack --no-terminal test --haddock --no-haddock-deps
+- stack --resolver %RESOLVER% --no-system-ghc --jobs 1 --no-terminal test --haddock --no-haddock-deps
