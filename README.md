@@ -1,3 +1,7 @@
+[![Travis Build Status](https://travis-ci.org/pepeiborra/strict-types.svg)](https://travis-ci.org/pepeiborra/strict-types)
+[![Hackage](https://img.shields.io/hackage/v/strict-types.svg)](https://hackage.haskell.org/package/strict-types)
+[![Stackage Nightly](http://stackage.org/package/strict-types/badge/nightly)](http://stackage.org/nightly/package/strict-types)
+
 strict-types
 ===================
 
