@@ -31,19 +31,20 @@ import Data.Vector.Storable as St
 import Data.Vector.Unboxed as U
 import qualified Foundation as F
 
-type family StrictRep (d :: *) (a :: * -> *) :: Constraint where
-  StrictRep d (M1 c (MetaData _ _ _ isNewtype) f) = StrictType isNewtype d f
+type family StrictRep (rec :: *) (a :: * -> *) :: Constraint where
+  StrictRep rec (M1 c (MetaData _ _ _ isNewtype) f) = StrictType rec isNewtype f
 
-type family StrictType (isNewtype :: Bool) (typ :: *) (a :: * -> *) :: Constraint where
-  StrictType isNewtype typ (C1 (MetaCons c _ _) f) = StrictCons isNewtype typ c f
-  StrictType isNewtype d (f :+: g) = (StrictType isNewtype d f, StrictType isNewtype d g)
-  StrictType isNewtype d (f :*: g) = (StrictType isNewtype d f, StrictType isNewtype d g)
-  StrictType isNewtype d (f :.: g) = (StrictType isNewtype d f, StrictType isNewtype d g)
+type family StrictType (rec :: *) (isNewtype :: Bool) (a :: * -> *) :: Constraint where
+  StrictType rec isNewtype (C1 (MetaCons c _ _) f) = StrictCons rec isNewtype c f
+  StrictType rec isNewtype (f :+: g) = (StrictType rec isNewtype f, StrictType rec isNewtype g)
+  StrictType rec isNewtype (f :*: g) = (StrictType rec isNewtype f, StrictType rec isNewtype g)
+  StrictType rec isNewtype (f :.: g) = (StrictType rec isNewtype f, StrictType rec isNewtype g)
 
-type family StrictCons (isNewtype :: Bool) (typ :: *) (cons :: Symbol) (a :: * -> *) :: Constraint where
-  StrictCons True      d cons (M1 c meta f) = StrictField d f
-  StrictCons isNewtype d cons (M1 c meta f) = (StrictSel d cons meta, StrictField d f)
-  StrictCons isNewtype d cons field = StrictField d field
+type family StrictCons rec (isNewtype :: Bool) (cons :: Symbol) (a :: * -> *) :: Constraint where
+  StrictCons rec True      cons (M1 c meta f) = StrictField rec f
+  StrictCons rec isNewtype cons (M1 c meta f) = (StrictSel rec cons meta, StrictField rec f)
+  StrictCons rec isNewtype cons (f :*: g)     = (StrictCons rec isNewtype cons f, StrictCons rec isNewtype cons g)
+  StrictCons rec isNewtype cons field         = StrictField rec field
 
 type family StrictField  (rec :: *) (a :: * -> *) :: Constraint where
   StrictField rec V1 = ()
