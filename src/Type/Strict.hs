@@ -21,6 +21,7 @@ import Data.Array.Storable as St
 import Data.Array.Unboxed as U
 import Data.ByteString
 import Data.Map.Strict
+import Data.Hashable
 import Data.HashMap.Strict
 import Data.HashSet
 import Data.Set
@@ -80,6 +81,7 @@ type family Strict (d :: *) :: Constraint where
   Strict ByteString = ()
   Strict Data.Text.Text = ()
   Strict F.String = ()
+  Strict (Hashed a) = Strict a
   -- Strict Containers
   Strict (UArray ix v) = ()
   Strict (StorableArray ix v) = ()
