@@ -1,6 +1,6 @@
 name:           strict-types
 author:         Pepe Iborra
-version:        0.1.0.2
+version:        0.1.0.4
 license:        BSD3
 license-file:   LICENSE
 copyright:      Jose Iborra Lopez, 2017
@@ -16,7 +16,15 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base < 5, array, bytestring, containers, foundation, hashable, text, unordered-containers, vector
+      base < 5, 
+      array, 
+      bytestring, 
+      containers, 
+      foundation, 
+      hashable, 
+      text, 
+      unordered-containers, 
+      vector
   exposed-modules:
       Type.Strict
   other-modules:
