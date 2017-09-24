@@ -1,6 +1,6 @@
 name:           strict-types
 author:         Pepe Iborra
-version:        0.1.0.4
+version:        0.1.0.5
 license:        BSD3
 license-file:   LICENSE
 copyright:      Jose Iborra Lopez, 2017
@@ -20,12 +20,14 @@ library
       array, 
       bytestring, 
       containers, 
+      deepseq,
       foundation, 
       hashable, 
       text, 
       unordered-containers, 
       vector
   exposed-modules:
+      Data.Strict,
       Type.Strict
   other-modules:
       Paths_strict_types

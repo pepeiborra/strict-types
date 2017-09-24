@@ -28,6 +28,7 @@ import qualified Data.HashSet as C
 import qualified Data.Set as C
 import qualified Data.Text
 import Data.Type.Bool
+import Data.Strict
 import Data.Vector.Primitive as P
 import Data.Vector.Storable as St
 import Data.Vector.Unboxed as U
@@ -86,6 +87,7 @@ type family StrictType (rec :: [*]) d :: Constraint where
   StrictType rec Int = ()
   StrictType rec Integer = ()
   StrictType rec Word = ()
+  StrictType rec (Forced a) = ()
   -- StrictType rec Data
   StrictType rec ByteString = ()
   StrictType rec Data.Text.Text = ()
