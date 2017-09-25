@@ -66,9 +66,9 @@ class IsDecidedStrict (t:: [*]) (cons :: Symbol) (field :: Maybe Symbol) (a :: D
 instance IsDecidedStrict t c f DecidedStrict
 instance IsDecidedStrict t c f DecidedUnpack
 instance TypeError (ShowType t :<>: Text " has an unnamed lazy field in constructor " :<>: Text c) =>
-         IsDecidedStrict t c Nothing DecidedLazy
+         IsDecidedStrict (t : tt) c Nothing DecidedLazy
 instance TypeError (ShowType t :<>: Text " has a lazy field " :<>: Text f :<>: Text " in constructor " :<>: Text c) =>
-         IsDecidedStrict t c (Just f) DecidedLazy
+         IsDecidedStrict (t : tt) c (Just f) DecidedLazy
 
 -- | A closed predicate that is satisfied only by strict types.
 -- 
