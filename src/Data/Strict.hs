@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PatternSynonyms #-}
@@ -19,11 +20,18 @@ newtype Forced a = Forced_
              , Show
              , NFData
              , Hashable
+             , Foldable
              )
 
 -- | A pattern constructor that forces its contents to 'rnf'
 pattern Forced :: NFData a => a -> Forced a
 pattern Forced { getForced } <- Forced_ getForced where Forced a = Forced_ (force a)
+
+map :: (NFData a, NFData b) => (b -> a) -> Forced b -> Forced a
+map f (Forced a) = Forced (f a)
+
+traverse :: (NFData a, NFData b, Applicative f) => (b -> f a) -> Forced b -> f (Forced a)
+traverse f (Forced a) = Forced <$> f a
 
 instance (NFData a, Read a) => Read(Forced a) where
   readsPrec p inp = [ (Forced x, rest) | (x, rest) <- readsPrec p inp ]
@@ -41,10 +49,10 @@ instance (NFData a, Enum a) => Enum (Forced a) where
   pred = Forced . pred . getForced
   fromEnum = fromEnum . getForced
   toEnum   = Forced . toEnum
-  enumFrom = map Forced . enumFrom . getForced
-  enumFromThen (Forced f) (Forced t) = map Forced $ enumFromThen f t
-  enumFromTo (Forced f) (Forced t) = map Forced $ enumFromTo f t
-  enumFromThenTo (Forced f) (Forced th) (Forced t) = map Forced $ enumFromThenTo f th t
+  enumFrom = fmap Forced . enumFrom . getForced
+  enumFromThen (Forced f) (Forced t) = Forced <$> enumFromThen f t
+  enumFromTo (Forced f) (Forced t) = Forced <$> enumFromTo f t
+  enumFromThenTo (Forced f) (Forced th) (Forced t) = Forced <$> enumFromThenTo f th t
 
 instance (NFData a, IsList a) => IsList (Forced a) where
   type Item (Forced a) = Item a
