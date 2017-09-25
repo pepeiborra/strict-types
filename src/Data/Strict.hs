@@ -25,6 +25,7 @@ newtype Forced a = Forced_
 
 -- | A pattern constructor that forces its contents to 'rnf'
 pattern Forced :: NFData a => a -> Forced a
+{-# COMPLETE Forced #-}
 pattern Forced { getForced } <- Forced_ getForced where Forced a = Forced_ (force a)
 
 map :: (NFData a, NFData b) => (b -> a) -> Forced b -> Forced a
