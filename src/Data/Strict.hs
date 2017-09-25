@@ -4,6 +4,8 @@
 {-# LANGUAGE PatternSynonyms #-}
 module Data.Strict
     ( Forced (Forced, getForced)
+    , Data.Strict.map
+    , Data.Strict.traverse
     ) where
 
 import Control.Arrow
@@ -13,9 +15,8 @@ import GHC.Exts
 import GHC.Float
 
 -- | A newtype to enforce rigid normal form evaluation.
-newtype Forced a = Forced_
-  { getForced_ :: a
-  } deriving ( Eq
+newtype Forced a = Forced_ a
+  deriving ( Eq
              , Ord
              , Show
              , NFData

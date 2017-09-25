@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS -Wno-unticked-promoted-constructors #-}
 -- | Type constraints and patterns for strict types.
 module Type.Strict
   ( Strict
@@ -15,19 +16,17 @@ module Type.Strict
 
 import GHC.Exts
 import GHC.Generics
-import GHC.TypeLits (Symbol, TypeError(..), ErrorMessage(..))
+import GHC.TypeLits (Symbol, TypeError, ErrorMessage(..))
 
 import Data.Array.Storable as St
 import Data.Array.Unboxed as U
 import Data.ByteString
-import Data.Kind
 import Data.Map.Strict
 import Data.Hashable
 import Data.HashMap.Strict
 import qualified Data.HashSet as C
 import qualified Data.Set as C
 import qualified Data.Text
-import Data.Type.Bool
 import Data.Strict
 import Data.Vector.Primitive as P
 import Data.Vector.Storable as St

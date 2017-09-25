@@ -1,5 +1,10 @@
+extra-deps: []
 
 resolver: nightly-2017-09-13
 
 packages:
 - '.'
+
+ghc-options:
+  "*":
+    -Wall
