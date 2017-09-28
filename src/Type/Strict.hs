@@ -11,6 +11,7 @@
 -- | Type constraints and patterns for strict types.
 module Type.Strict
   ( Strict
+  , StrictType
   , pattern IsStrict
   ) where
 
@@ -21,9 +22,7 @@ import GHC.TypeLits (Symbol, TypeError, ErrorMessage(..))
 import Data.Array.Storable as St
 import Data.Array.Unboxed as U
 import Data.ByteString
-import Data.Map.Strict
 import Data.Hashable
-import Data.HashMap.Strict
 import qualified Data.HashSet as C
 import qualified Data.Set as C
 import qualified Data.Text
@@ -79,34 +78,31 @@ instance TypeError (ShowType t :<>: Text " has a lazy field " :<>: Text f :<>: T
 type family Strict a :: Constraint where
   Strict d = StrictType '[d] d
 
-type family StrictType (rec :: [*]) d :: Constraint where
-  -- Primitives
-  StrictType rec Char = ()
-  StrictType rec Double = ()
-  StrictType rec Int = ()
-  StrictType rec Integer = ()
-  StrictType rec Word = ()
-  StrictType rec (Forced a) = ()
+class StrictType (seen :: [*]) a
+instance StrictType seen Char
+instance StrictType seen Double
+instance StrictType seen Int
+instance StrictType seen Integer
+instance StrictType seen Word
+instance StrictType seen (Forced a)
   -- StrictType rec Data
-  StrictType rec ByteString = ()
-  StrictType rec Data.Text.Text = ()
-  StrictType rec F.String = ()
-  StrictType rec (Hashed a) = StrictType rec a
+instance StrictType seen ByteString
+instance StrictType seen Data.Text.Text
+instance StrictType seen F.String
+instance StrictType seen a => StrictType seen (Hashed a)
   -- StrictType rec Containers
-  StrictType rec (UArray ix v) = ()
-  StrictType rec (StorableArray ix v) = ()
-  StrictType rec (Map k v) = (StrictType rec k, StrictType rec v)
-  StrictType rec (HashMap k v) = (StrictType rec k, StrictType rec v)
-  StrictType rec (C.Set k) = StrictType rec k
-  StrictType rec (C.HashSet k) = StrictType rec k
-  StrictType rec (U.Vector a) = ()
-  StrictType rec (U.MVector s a) = ()
-  StrictType rec (St.Vector a) = ()
-  StrictType rec (St.MVector s a) = ()
-  StrictType rec (P.Vector a) = ()
-  StrictType rec (P.MVector s a) = ()
+instance StrictType seen (UArray ix v)
+instance StrictType seen (StorableArray ix v)
+instance StrictType seen k => StrictType seen (C.Set k)
+instance StrictType seen k => StrictType seen (C.HashSet k)
+instance StrictType seen (U.Vector a)
+instance StrictType seen (U.MVector s a)
+instance StrictType seen (St.Vector a)
+instance StrictType seen (St.MVector s a)
+instance StrictType seen (P.Vector a)
+instance StrictType seen (P.MVector s a)
   -- Generics
-  StrictType rec d = StrictRep (d : rec) (Rep d)
+instance StrictRep (d : seen) (Rep d) => StrictType seen d
 
 -- | A pattern that matches strict types
 pattern IsStrict :: Strict a => a -> a
