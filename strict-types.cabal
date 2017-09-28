@@ -28,6 +28,7 @@ library
       vector
   exposed-modules:
       Data.Strict,
+      Data.Strict.HashMap,
       Type.Strict
   other-modules:
       Paths_strict_types
