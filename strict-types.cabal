@@ -21,7 +21,6 @@ library
       bytestring, 
       containers, 
       deepseq,
-      foundation, 
       hashable, 
       text, 
       unordered-containers, 

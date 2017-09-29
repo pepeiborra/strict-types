@@ -30,7 +30,6 @@ import Data.Strict
 import Data.Vector.Primitive as P
 import Data.Vector.Storable as St
 import Data.Vector.Unboxed as U
-import qualified Foundation as F
 
 type family StrictRep (rec :: [*]) (a :: * -> *) :: Constraint where
   StrictRep rec (M1 c (MetaData _ _ _ isNewtype) f) = StrictData rec isNewtype f
@@ -85,12 +84,11 @@ instance StrictType seen Int
 instance StrictType seen Integer
 instance StrictType seen Word
 instance StrictType seen (Forced a)
-  -- StrictType rec Data
+  -- Data
 instance StrictType seen ByteString
 instance StrictType seen Data.Text.Text
-instance StrictType seen F.String
 instance StrictType seen a => StrictType seen (Hashed a)
-  -- StrictType rec Containers
+  -- Containers
 instance StrictType seen (UArray ix v)
 instance StrictType seen (StorableArray ix v)
 instance StrictType seen k => StrictType seen (C.Set k)
