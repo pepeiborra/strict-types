@@ -31,31 +31,37 @@ import Data.Vector.Primitive as P
 import Data.Vector.Storable as St
 import Data.Vector.Unboxed as U
 
+-- Generic rep strictness checker
 type family StrictRep (rec :: [*]) (a :: * -> *) :: Constraint where
   StrictRep rec (M1 c (MetaData _ _ _ isNewtype) f) = StrictData rec isNewtype f
 
+-- Datatype equations
 type family StrictData (rec :: [*]) (isNewtype :: Bool) (a :: * -> *) :: Constraint where
   StrictData rec isNewtype (C1 (MetaCons c _ _) f) = StrictCons rec isNewtype c f
   StrictData rec isNewtype (f :+: g) = (StrictData rec isNewtype f, StrictData rec isNewtype g)
   StrictData rec isNewtype (f :*: g) = (StrictData rec isNewtype f, StrictData rec isNewtype g)
   StrictData rec isNewtype (f :.: g) = (StrictData rec isNewtype f, StrictData rec isNewtype g)
 
+-- Constructor equations
 type family StrictCons (rec :: [*]) (isNewtype :: Bool) (cons :: Symbol) (a :: * -> *) :: Constraint where
   StrictCons rec True      cons (M1 c meta f) = StrictField rec f
   StrictCons rec False     cons (M1 c meta f) = (StrictSel rec cons meta, StrictField rec f)
   StrictCons rec isNewtype cons (f :*: g)     = (StrictCons rec isNewtype cons f, StrictCons rec isNewtype cons g)
   StrictCons rec isNewtype cons field         = StrictField rec field
 
+-- Field equations
 type family StrictField  (rec :: [*]) (a :: * -> *) :: Constraint where
   StrictField rec V1 = ()
   StrictField rec U1 = ()
   StrictField rec (K1 _ t) = StrictCond rec (Elem t rec) t
   StrictField rec (URec t) = StrictCond rec (Elem t rec) t
 
+-- | Field strictness checker. Tries to spot recursion.
 type family StrictCond rec (cond :: Bool) t :: Constraint where
   StrictCond rec True  t = ()
   StrictCond rec False t = StrictType (t : rec) t
 
+-- | Field metadata checker
 type family StrictSel (typ :: [*]) (cons :: Symbol) (m :: Meta) :: Constraint where
   StrictSel rec cons (MetaSel mn su ss ds) = IsDecidedStrict rec cons mn ds
 
@@ -67,8 +73,8 @@ instance TypeError (ShowType t :<>: Text " has an unnamed lazy field in construc
 instance TypeError (ShowType t :<>: Text " has a lazy field " :<>: Text f :<>: Text " in constructor " :<>: Text c) =>
          IsDecidedStrict (t : tt) c (Just f) DecidedLazy
 
--- | A closed predicate that is satisfied only by strict types.
--- 
+-- | A type predicate that is satisfied only by strict types.
+--
 --   A type T is strict if
 --
 --   > ∀x :: T . rnf x = ⊥ <=> rwhnf x = ⊥
@@ -77,6 +83,9 @@ instance TypeError (ShowType t :<>: Text " has a lazy field " :<>: Text f :<>: T
 type family Strict a :: Constraint where
   Strict d = StrictType '[d] d
 
+-- | An open class to constrain strict types.
+--   An instance is an unchecked promise that a type is fully strict.
+--   The type checker can automatically verify the constraint (no instance needed) for generic types.
 class StrictType (seen :: [*]) a
 instance StrictType seen Char
 instance StrictType seen Double
