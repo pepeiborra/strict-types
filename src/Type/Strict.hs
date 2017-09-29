@@ -88,7 +88,7 @@ instance StrictType seen (Forced a)
 instance StrictType seen ByteString
 instance StrictType seen Data.Text.Text
 instance StrictType seen a => StrictType seen (Hashed a)
-  -- Containers
+  -- rec Containers
 instance StrictType seen (UArray ix v)
 instance StrictType seen (StorableArray ix v)
 instance StrictType seen k => StrictType seen (C.Set k)
@@ -100,7 +100,7 @@ instance StrictType seen (St.MVector s a)
 instance StrictType seen (P.Vector a)
 instance StrictType seen (P.MVector s a)
   -- Generics
-instance StrictRep (d : seen) (Rep d) => StrictType seen d
+instance {-# OVERLAPPABLE #-} StrictRep (d : seen) (Rep d) => StrictType seen d
 
 -- | A pattern that matches strict types
 pattern IsStrict :: Strict a => a -> a
