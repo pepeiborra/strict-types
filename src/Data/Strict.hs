@@ -6,6 +6,7 @@ module Data.Strict
     ( Forced (Forced, getForced)
     , Data.Strict.map
     , Data.Strict.traverse
+    , (<!>)
     ) where
 
 import Control.Arrow
@@ -19,7 +20,6 @@ newtype Forced a = Forced_ a
   deriving ( Eq
              , Ord
              , Show
-             , NFData
              , Hashable
              , Foldable
              )
@@ -29,11 +29,16 @@ pattern Forced :: NFData a => a -> Forced a
 {-# COMPLETE Forced #-}
 pattern Forced { getForced } <- Forced_ getForced where Forced a = Forced_ (force a)
 
-map :: (NFData a, NFData b) => (b -> a) -> Forced b -> Forced a
-map f (Forced a) = Forced (f a)
+map :: (NFData a) => (b -> a) -> Forced b -> Forced a
+map f (Forced_ b) = Forced (f b)
 
-traverse :: (NFData a, NFData b, Applicative f) => (b -> f a) -> Forced b -> f (Forced a)
-traverse f (Forced a) = Forced <$> f a
+traverse :: (NFData a, Applicative f) => (b -> f a) -> Forced b -> f (Forced a)
+traverse f (Forced_ a) = Forced <$> f a
+
+(<!>) :: NFData a => Forced (t -> a) -> Forced t -> Forced a
+Forced_ f <!> Forced_ x = Forced (f x)
+
+instance NFData (Forced a) where rnf _ = ()
 
 instance (NFData a, Read a) => Read(Forced a) where
   readsPrec p inp = [ (Forced x, rest) | (x, rest) <- readsPrec p inp ]
