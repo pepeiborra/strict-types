@@ -74,7 +74,7 @@ instance (Eq k, Hashable k, Read k, Read a) => Read (HashMap k a) where
 instance (Eq k, Hashable k, Read k) => Read1 (HashMap k) where
   liftReadsPrec rp rl p s = first (Strict . H.map id) <$> liftReadsPrec rp rl p s
 
-instance (Eq k, Hashable k) => Traversable (HashMap k) where
+instance Traversable (HashMap k) where
   traverse f = traverseWithKey (const f)
 
 instance (StrictType seen k, StrictType seen v) => StrictType seen (HashMap k v)
