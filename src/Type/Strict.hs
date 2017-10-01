@@ -22,6 +22,7 @@ import GHC.TypeLits (Symbol, TypeError, ErrorMessage(..))
 import Data.Array.Storable as St
 import Data.Array.Unboxed as U
 import Data.ByteString
+import Data.Int
 import Data.Hashable
 import qualified Data.HashSet as C
 import qualified Data.Set as C
@@ -30,6 +31,7 @@ import Data.Strict
 import Data.Vector.Primitive as P
 import Data.Vector.Storable as St
 import Data.Vector.Unboxed as U
+import Data.Word
 
 -- Generic rep strictness checker
 type family StrictRep (rec :: [*]) (a :: * -> *) :: Constraint where
@@ -90,8 +92,16 @@ class StrictType (seen :: [*]) a
 instance StrictType seen Char
 instance StrictType seen Double
 instance StrictType seen Int
+instance StrictType seen Int8
+instance StrictType seen Int16
+instance StrictType seen Int32
+instance StrictType seen Int64
 instance StrictType seen Integer
 instance StrictType seen Word
+instance StrictType seen Word8
+instance StrictType seen Word16
+instance StrictType seen Word32
+instance StrictType seen Word64
 instance StrictType seen (Forced a)
   -- Data
 instance StrictType seen ByteString
