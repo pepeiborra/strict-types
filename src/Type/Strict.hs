@@ -102,7 +102,7 @@ instance StrictType seen Word8
 instance StrictType seen Word16
 instance StrictType seen Word32
 instance StrictType seen Word64
-instance StrictType seen (Forced a)
+instance StrictType seen (Rnf a)
   -- Data
 instance StrictType seen ByteString
 instance StrictType seen Data.Text.Text
