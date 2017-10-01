@@ -3,7 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PatternSynonyms #-}
 module Data.Strict
-    ( Rnf (Rnf, getRnf)
+    ( Forced (Forced, getForced)
     , Data.Strict.map
     , Data.Strict.traverse
     , (<!>)
@@ -16,7 +16,7 @@ import GHC.Exts
 import GHC.Float
 
 -- | A newtype to enforce rigid normal form evaluation.
-newtype Rnf a = Rnf_ a
+newtype Forced a = Forced_ a
   deriving ( Eq
              , Ord
              , Show
@@ -25,116 +25,116 @@ newtype Rnf a = Rnf_ a
              )
 
 -- | A pattern constructor that forces its contents to 'rnf'
-pattern Rnf :: NFData a => a -> Rnf a
-{-# COMPLETE Rnf #-}
-pattern Rnf { getRnf } <- Rnf_ getRnf where Rnf a = Rnf_ (force a)
+pattern Forced :: NFData a => a -> Forced a
+{-# COMPLETE Forced #-}
+pattern Forced { getForced } <- Forced_ getForced where Forced a = Forced_ (force a)
 
-map :: (NFData a) => (b -> a) -> Rnf b -> Rnf a
-map f (Rnf_ b) = Rnf (f b)
+map :: (NFData a) => (b -> a) -> Forced b -> Forced a
+map f (Forced_ b) = Forced (f b)
 
-traverse :: (NFData a, Applicative f) => (b -> f a) -> Rnf b -> f (Rnf a)
-traverse f (Rnf_ a) = Rnf <$> f a
+traverse :: (NFData a, Applicative f) => (b -> f a) -> Forced b -> f (Forced a)
+traverse f (Forced_ a) = Forced <$> f a
 
-(<!>) :: NFData a => Rnf (t -> a) -> Rnf t -> Rnf a
-Rnf_ f <!> Rnf_ x = Rnf (f x)
+(<!>) :: NFData a => Forced (t -> a) -> Forced t -> Forced a
+Forced_ f <!> Forced_ x = Forced (f x)
 
-instance NFData (Rnf a) where rnf _ = ()
+instance NFData (Forced a) where rnf _ = ()
 
-instance (NFData a, Read a) => Read(Rnf a) where
-  readsPrec p inp = [ (Rnf x, rest) | (x, rest) <- readsPrec p inp ]
+instance (NFData a, Read a) => Read(Forced a) where
+  readsPrec p inp = [ (Forced x, rest) | (x, rest) <- readsPrec p inp ]
 
-instance (NFData a, Monoid a) => Monoid (Rnf a) where
-  mempty = Rnf mempty
-  mappend (Rnf a) (Rnf b) = Rnf (mappend a b)
+instance (NFData a, Monoid a) => Monoid (Forced a) where
+  mempty = Forced mempty
+  mappend (Forced a) (Forced b) = Forced (mappend a b)
 
-instance (NFData a, Bounded a) => Bounded (Rnf a) where
-  minBound = Rnf minBound
-  maxBound = Rnf maxBound
+instance (NFData a, Bounded a) => Bounded (Forced a) where
+  minBound = Forced minBound
+  maxBound = Forced maxBound
 
-instance (NFData a, Enum a) => Enum (Rnf a) where
-  succ = Rnf . succ . getRnf
-  pred = Rnf . pred . getRnf
-  fromEnum = fromEnum . getRnf
-  toEnum   = Rnf . toEnum
-  enumFrom = fmap Rnf . enumFrom . getRnf
-  enumFromThen (Rnf f) (Rnf t) = Rnf <$> enumFromThen f t
-  enumFromTo (Rnf f) (Rnf t) = Rnf <$> enumFromTo f t
-  enumFromThenTo (Rnf f) (Rnf th) (Rnf t) = Rnf <$> enumFromThenTo f th t
+instance (NFData a, Enum a) => Enum (Forced a) where
+  succ = Forced . succ . getForced
+  pred = Forced . pred . getForced
+  fromEnum = fromEnum . getForced
+  toEnum   = Forced . toEnum
+  enumFrom = fmap Forced . enumFrom . getForced
+  enumFromThen (Forced f) (Forced t) = Forced <$> enumFromThen f t
+  enumFromTo (Forced f) (Forced t) = Forced <$> enumFromTo f t
+  enumFromThenTo (Forced f) (Forced th) (Forced t) = Forced <$> enumFromThenTo f th t
 
-instance (NFData a, IsList a) => IsList (Rnf a) where
-  type Item (Rnf a) = Item a
-  fromList = Rnf . fromList
-  toList = toList . getRnf
+instance (NFData a, IsList a) => IsList (Forced a) where
+  type Item (Forced a) = Item a
+  fromList = Forced . fromList
+  toList = toList . getForced
 
-instance (NFData a, Num a) => Num (Rnf a) where
-  Rnf a + Rnf b = Rnf (a + b)
-  Rnf a - Rnf b = Rnf (a - b)
-  Rnf a * Rnf b = Rnf (a * b)
-  negate = Rnf . negate . getRnf
-  abs = Rnf . abs . getRnf
-  signum = Rnf . abs . getRnf
-  fromInteger = Rnf . fromInteger
+instance (NFData a, Num a) => Num (Forced a) where
+  Forced a + Forced b = Forced (a + b)
+  Forced a - Forced b = Forced (a - b)
+  Forced a * Forced b = Forced (a * b)
+  negate = Forced . negate . getForced
+  abs = Forced . abs . getForced
+  signum = Forced . abs . getForced
+  fromInteger = Forced . fromInteger
 
-instance (NFData a, Integral a) => Integral (Rnf a) where
-  quot (Rnf a) (Rnf b) = Rnf (quot a b)
-  rem (Rnf a) (Rnf b) = Rnf (rem a b)
-  div (Rnf a) (Rnf b) = Rnf (div a b)
-  mod (Rnf a) (Rnf b) = Rnf (mod a b)
-  quotRem (Rnf a) (Rnf b) = (Rnf *** Rnf) (quotRem a b)
-  divMod (Rnf a) (Rnf b) = (Rnf *** Rnf) (divMod a b)
-  toInteger = toInteger . getRnf
+instance (NFData a, Integral a) => Integral (Forced a) where
+  quot (Forced a) (Forced b) = Forced (quot a b)
+  rem (Forced a) (Forced b) = Forced (rem a b)
+  div (Forced a) (Forced b) = Forced (div a b)
+  mod (Forced a) (Forced b) = Forced (mod a b)
+  quotRem (Forced a) (Forced b) = (Forced *** Forced) (quotRem a b)
+  divMod (Forced a) (Forced b) = (Forced *** Forced) (divMod a b)
+  toInteger = toInteger . getForced
 
-instance (NFData a, Fractional a) => Fractional (Rnf a) where
-  Rnf a / Rnf b = Rnf (a / b)
-  recip = Rnf . recip . getRnf
-  fromRational = Rnf . fromRational
+instance (NFData a, Fractional a) => Fractional (Forced a) where
+  Forced a / Forced b = Forced (a / b)
+  recip = Forced . recip . getForced
+  fromRational = Forced . fromRational
 
-instance (NFData a, Floating a) => Floating (Rnf a) where
-  pi = Rnf pi
-  Rnf a ** Rnf b = Rnf (a ** b)
-  logBase (Rnf a) (Rnf b) = Rnf (logBase a b)
-  exp       = Rnf . exp . getRnf
-  log       = Rnf . log . getRnf
-  sqrt      = Rnf . sqrt . getRnf
-  sin       = Rnf . sin . getRnf
-  cos       = Rnf . cos . getRnf
-  tan       = Rnf . tan . getRnf
-  asin      = Rnf . asin . getRnf
-  acos      = Rnf . acos . getRnf
-  atan      = Rnf . atan . getRnf
-  sinh      = Rnf . sinh . getRnf
-  cosh      = Rnf . cosh . getRnf
-  tanh      = Rnf . tanh . getRnf
-  asinh     = Rnf . asinh . getRnf
-  acosh     = Rnf . acosh . getRnf
-  atanh     = Rnf . atanh . getRnf
-  log1p     = Rnf . log1p . getRnf
-  expm1     = Rnf . expm1 . getRnf
-  log1pexp  = Rnf . log1pexp. getRnf
-  log1mexp  = Rnf . log1mexp. getRnf
+instance (NFData a, Floating a) => Floating (Forced a) where
+  pi = Forced pi
+  Forced a ** Forced b = Forced (a ** b)
+  logBase (Forced a) (Forced b) = Forced (logBase a b)
+  exp       = Forced . exp . getForced
+  log       = Forced . log . getForced
+  sqrt      = Forced . sqrt . getForced
+  sin       = Forced . sin . getForced
+  cos       = Forced . cos . getForced
+  tan       = Forced . tan . getForced
+  asin      = Forced . asin . getForced
+  acos      = Forced . acos . getForced
+  atan      = Forced . atan . getForced
+  sinh      = Forced . sinh . getForced
+  cosh      = Forced . cosh . getForced
+  tanh      = Forced . tanh . getForced
+  asinh     = Forced . asinh . getForced
+  acosh     = Forced . acosh . getForced
+  atanh     = Forced . atanh . getForced
+  log1p     = Forced . log1p . getForced
+  expm1     = Forced . expm1 . getForced
+  log1pexp  = Forced . log1pexp. getForced
+  log1mexp  = Forced . log1mexp. getForced
 
-instance (NFData a, RealFloat a) => RealFloat (Rnf a) where
-  floatRadix = floatRadix . getRnf
-  floatDigits = floatDigits . getRnf
-  floatRange = floatRange . getRnf
-  decodeFloat = decodeFloat . getRnf
-  encodeFloat i j = Rnf (encodeFloat i j)
-  exponent = exponent . getRnf
-  significand = Rnf . significand . getRnf
-  scaleFloat i = Rnf . scaleFloat i . getRnf
-  isNaN = isNaN . getRnf
-  isInfinite = isInfinite . getRnf
-  isDenormalized = isDenormalized . getRnf
-  isNegativeZero = isNegativeZero . getRnf
-  isIEEE = isIEEE . getRnf
-  atan2 (Rnf a) (Rnf b) = Rnf (atan2 a b)
+instance (NFData a, RealFloat a) => RealFloat (Forced a) where
+  floatRadix = floatRadix . getForced
+  floatDigits = floatDigits . getForced
+  floatRange = floatRange . getForced
+  decodeFloat = decodeFloat . getForced
+  encodeFloat i j = Forced (encodeFloat i j)
+  exponent = exponent . getForced
+  significand = Forced . significand . getForced
+  scaleFloat i = Forced . scaleFloat i . getForced
+  isNaN = isNaN . getForced
+  isInfinite = isInfinite . getForced
+  isDenormalized = isDenormalized . getForced
+  isNegativeZero = isNegativeZero . getForced
+  isIEEE = isIEEE . getForced
+  atan2 (Forced a) (Forced b) = Forced (atan2 a b)
 
-instance (NFData a, RealFrac a) => RealFrac (Rnf a) where
-  properFraction = second Rnf . properFraction . getRnf
-  truncate = truncate . getRnf
-  round = round . getRnf
-  ceiling = ceiling . getRnf
-  floor = floor . getRnf
+instance (NFData a, RealFrac a) => RealFrac (Forced a) where
+  properFraction = second Forced . properFraction . getForced
+  truncate = truncate . getForced
+  round = round . getForced
+  ceiling = ceiling . getForced
+  floor = floor . getForced
 
-instance (NFData a, Real a) => Real (Rnf a) where
-  toRational = toRational . getRnf
+instance (NFData a, Real a) => Real (Forced a) where
+  toRational = toRational . getForced
