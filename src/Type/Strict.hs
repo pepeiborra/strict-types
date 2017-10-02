@@ -12,10 +12,10 @@
 {-# OPTIONS -Wno-unticked-promoted-constructors #-}
 -- | Type constraints and patterns for strict types.
 module Type.Strict
-  ( Strict
-  , StrictType
-  , pattern Strict
+  ( pattern Strict
   , pattern Rnf
+  , Strict
+  , StrictType
   ) where
 
 import GHC.Exts
@@ -78,19 +78,24 @@ instance TypeError (ShowType t :<>: Text " has an unnamed lazy field in construc
 instance TypeError (ShowType t :<>: Text " has a lazy field " :<>: Text f :<>: Text " in constructor " :<>: Text c) =>
          IsDecidedStrict (t : tt) c (Just f) DecidedLazy
 
--- | A type predicate that is satisfied only by strict types.
+-- | A constraint that is satisfied only by strict types.
 --
 --   A type T is strict if
 --
 --   > ∀x :: T . rnf x = ⊥ <=> rwhnf x = ⊥
 --
---   Requires undecidable instances. Experimental (and inefficient) support for mutually recursive groups of types.
+--   Mutually recursive types are experimentally supported but non regular types are not.
 type family Strict a :: Constraint where
   Strict d = StrictType '[d] d
 
--- | An open class to constrain strict types.
+-- | An empty class to constrain strict types.
 --   An instance is an unchecked promise that a type is fully strict.
---   The type checker can automatically verify the constraint (no instance needed) for generic types.
+--   No instances are needed for generic non-nested datatypes.
+--
+--   Define an instance as follows:
+--
+--   > instance StrictType seen Foo
+--
 class StrictType (seen :: [*]) a
 instance StrictType seen Char
 instance StrictType seen Double
