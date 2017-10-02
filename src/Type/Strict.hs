@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
@@ -128,7 +129,7 @@ pattern Strict a = a
 
 -- | A pattern that matches 'NFData' types only and forces values to rigid normal form
 pattern Rnf :: NFData a => a -> a
-pattern Rnf a <- (D.force -> a) where Rnf a = D.force a
+pattern Rnf a <- (D.force -> !a) where Rnf a = D.force a
 
 type family Elem a (aa :: [*]) where
   Elem a '[] = False
