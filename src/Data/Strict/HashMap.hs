@@ -60,7 +60,7 @@ import Data.Hashable.Lifted
 import qualified Data.HashMap.Strict as H
 import Data.Semigroup
 import GHC.Exts
-import Type.Strict
+import Type.Strict hiding (Strict)
 
 newtype HashMap k a = Strict { getStrict :: H.HashMap k a}
   deriving (Data, NFData, Eq, Show, Eq1, Show1, Eq2, Show2, Hashable, Hashable1, Hashable2, Foldable, Semigroup, Monoid)

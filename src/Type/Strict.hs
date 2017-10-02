@@ -12,7 +12,7 @@
 module Type.Strict
   ( Strict
   , StrictType
-  , pattern IsStrict
+  , pattern Strict
   ) where
 
 import GHC.Exts
@@ -121,9 +121,9 @@ instance StrictType seen (P.MVector s a)
   -- Generics
 instance {-# OVERLAPPABLE #-} StrictRep (d : seen) (Rep d) => StrictType seen d
 
--- | A pattern that matches strict types
-pattern IsStrict :: Strict a => a -> a
-pattern IsStrict a = a
+-- | A pattern that matches 'Strict' types only
+pattern Strict :: Strict a => a -> a
+pattern Strict a = a
 
 type family Elem a (aa :: [*]) where
   Elem a '[] = False
