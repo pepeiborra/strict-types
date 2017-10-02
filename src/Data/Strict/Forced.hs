@@ -1,11 +1,14 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PatternSynonyms #-}
-module Data.Strict
-    ( Forced (Forced, getForced)
-    , Data.Strict.map
-    , Data.Strict.traverse
+module Data.Strict.Forced
+    (
+      Forced (Forced, getForced)
+    , Data.Strict.Forced.map
+    , Data.Strict.Forced.traverse
     , (<!>)
     ) where
 
@@ -14,6 +17,7 @@ import Control.DeepSeq
 import Data.Hashable
 import GHC.Exts
 import GHC.Float
+import Type.Strict
 
 -- | A newtype to enforce rigid normal form evaluation.
 newtype Forced a = Forced_ a
@@ -23,6 +27,8 @@ newtype Forced a = Forced_ a
              , Hashable
              , Foldable
              )
+
+instance StrictType seen (Forced a)
 
 -- | A pattern constructor that forces its contents to 'rnf'
 pattern Forced :: NFData a => a -> Forced a

@@ -30,7 +30,6 @@ import Data.Hashable
 import qualified Data.HashSet as C
 import qualified Data.Set as C
 import qualified Data.Text
-import Data.Strict
 import Data.Vector.Primitive as P
 import Data.Vector.Storable as St
 import Data.Vector.Unboxed as U
@@ -105,7 +104,6 @@ instance StrictType seen Word8
 instance StrictType seen Word16
 instance StrictType seen Word32
 instance StrictType seen Word64
-instance StrictType seen (Forced a)
   -- Data
 instance StrictType seen ByteString
 instance StrictType seen Data.Text.Text
