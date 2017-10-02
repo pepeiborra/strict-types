@@ -7,18 +7,21 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS -Wno-unticked-promoted-constructors #-}
 -- | Type constraints and patterns for strict types.
 module Type.Strict
   ( Strict
   , StrictType
   , pattern Strict
+  , pattern Rnf
   ) where
 
 import GHC.Exts
 import GHC.Generics
 import GHC.TypeLits (Symbol, TypeError, ErrorMessage(..))
 
+import Control.DeepSeq as D
 import Data.Array.Storable as St
 import Data.Array.Unboxed as U
 import Data.ByteString
@@ -124,6 +127,10 @@ instance {-# OVERLAPPABLE #-} StrictRep (d : seen) (Rep d) => StrictType seen d
 -- | A pattern that matches 'Strict' types only
 pattern Strict :: Strict a => a -> a
 pattern Strict a = a
+
+-- | A pattern that matches 'NFData' types only and forces values to rigid normal form
+pattern Rnf :: NFData a => a -> a
+pattern Rnf a <- (D.force -> a) where Rnf a = D.force a
 
 type family Elem a (aa :: [*]) where
   Elem a '[] = False
