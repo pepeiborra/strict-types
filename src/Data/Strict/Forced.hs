@@ -51,7 +51,8 @@ instance (NFData a, Read a) => Read(Forced a) where
 
 instance (NFData a, Monoid a) => Monoid (Forced a) where
   mempty = Forced mempty
-  mappend (Forced a) (Forced b) = Forced (mappend a b)
+instance (NFData a, Semigroup a) => Semigroup (Forced a) where
+  Forced a <> Forced b = Forced (a <> b)
 
 instance (NFData a, Bounded a) => Bounded (Forced a) where
   minBound = Forced minBound

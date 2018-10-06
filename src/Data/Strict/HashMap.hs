@@ -58,7 +58,6 @@ import Data.Functor.Classes
 import Data.Hashable
 import Data.Hashable.Lifted
 import qualified Data.HashMap.Strict as H
-import Data.Semigroup
 import GHC.Exts
 import Type.Strict hiding (Strict)
 
