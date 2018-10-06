@@ -28,7 +28,9 @@ addons:
 
 env:
     - RESOLVER: lts-9.4
-    - RESOLVER: nightly-2017-09-10
+    - RESOLVER: lts-11
+    - RESOLVER: lts-12
+    - RESOLVER: nightly
 
   
 before_install:
