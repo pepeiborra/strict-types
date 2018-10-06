@@ -1,8 +1,8 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveDataTypeable         #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE TypeFamilies               #-}
 
 -- | A wrapper around 'H.HashMap' from the unordered-containers package,
 --   with the aim of fixing the strictness of the type class operations,
@@ -50,16 +50,20 @@ module Data.Strict.HashMap
     , (!)
     )where
 
-import Prelude hiding (filter, foldr, lookup, map, null)
-import Control.DeepSeq
-import Data.Bifunctor
-import Data.Data
-import Data.Functor.Classes
-import Data.Hashable
-import Data.Hashable.Lifted
-import qualified Data.HashMap.Strict as H
-import GHC.Exts
-import Type.Strict hiding (Strict)
+import           Control.DeepSeq
+import           Data.Bifunctor
+import           Data.Data
+import           Data.Functor.Classes
+import           Data.Hashable
+import           Data.Hashable.Lifted
+import qualified Data.HashMap.Strict  as H
+import           Data.Semigroup
+import           GHC.Exts
+import           Prelude              (Applicative (..), Bool (..), Eq (..),
+                                       Foldable, Functor (..), Maybe (..),
+                                       Monoid (..), Read (..), Show (..),
+                                       Traversable (..), const, id, (.), (<$>))
+import           Type.Strict          hiding (Strict)
 
 newtype HashMap k a = Strict { getStrict :: H.HashMap k a}
   deriving (Data, NFData, Eq, Show, Eq1, Show1, Eq2, Show2, Hashable, Hashable1, Hashable2, Foldable, Semigroup, Monoid)

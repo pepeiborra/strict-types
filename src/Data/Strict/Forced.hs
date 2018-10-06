@@ -1,9 +1,9 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE DeriveFoldable #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFoldable             #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE PatternSynonyms            #-}
+{-# LANGUAGE TypeFamilies               #-}
 module Data.Strict.Forced
     (
       Forced (Forced, getForced)
@@ -12,12 +12,18 @@ module Data.Strict.Forced
     , (<!>)
     ) where
 
-import Control.Arrow
-import Control.DeepSeq
-import Data.Hashable
-import GHC.Exts
-import GHC.Float
-import Type.Strict
+import           Control.Arrow
+import           Control.DeepSeq
+import           Data.Hashable
+import           Data.Semigroup (Semigroup(..))
+import           GHC.Exts
+import           GHC.Float
+import           Prelude         (Applicative (..), Bounded (..), Enum (..),
+                                  Eq (..), Foldable (..), Fractional (..), Functor(..),
+                                  Integral (..), Monoid (..), Num (..),
+                                  Ord (..), Read (..), Real (..), RealFrac (..),
+                                  Show (..), (<$>), (.))
+import           Type.Strict
 
 -- | A newtype to enforce rigid normal form evaluation.
 newtype Forced a = Forced_ a
@@ -49,8 +55,10 @@ instance NFData (Forced a) where rnf _ = ()
 instance (NFData a, Read a) => Read(Forced a) where
   readsPrec p inp = [ (Forced x, rest) | (x, rest) <- readsPrec p inp ]
 
-instance (NFData a, Monoid a) => Monoid (Forced a) where
+instance (Semigroup a, NFData a, Monoid a) => Monoid (Forced a) where
   mempty = Forced mempty
+  mappend = (<>)
+
 instance (NFData a, Semigroup a) => Semigroup (Forced a) where
   Forced a <> Forced b = Forced (a <> b)
 
